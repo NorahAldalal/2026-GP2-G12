@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Siraj.jpg" width="70%">
+  <img src="siraj/Siraj.jpg" width="70%">
 </p>
 
 # Siraj
