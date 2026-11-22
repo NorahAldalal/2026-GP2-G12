@@ -306,7 +306,10 @@ const boxes = Array.from(document.querySelectorAll('.code-box'));
 const vBtn  = document.getElementById('verify-code-btn');
 boxes.forEach((b,i) => {
   b.addEventListener('keydown', function(e) {
-    if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+    // Block only clearly non-numeric keys; mobile keyboards send key "Unidentified"/"Process", so never block those.
+    if (e.key && e.key.length === 1 && !/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    if (e.key==='ArrowLeft'  && i > 0)              { e.preventDefault(); boxes[i-1].focus(); }
+    if (e.key==='ArrowRight' && i < boxes.length-1) { e.preventDefault(); boxes[i+1].focus(); }
     if (e.key==='Backspace') { e.preventDefault(); this.value=''; this.classList.remove('filled','eb'); if(i>0) boxes[i-1].focus(); upd(); }
   });
   b.addEventListener('input', function() {
@@ -334,8 +337,11 @@ if (<?= $wrongCode ? 'true' : 'false' ?>) {
     setTimeout(() => w.classList.remove('shake-anim'), 600);
   }, 400);
 }
-document.getElementById('code-modal').addEventListener('transitionend', function() {
-  if (this.classList.contains('open')) setTimeout(() => boxes[0].focus(), 100);
+// Focus the first box only when the modal itself finishes opening.
+// (transitionend bubbles up from the code boxes, which used to pull focus back to box 1 on every keystroke.)
+document.getElementById('code-modal').addEventListener('transitionend', function(e) {
+  if (e.target !== this || e.propertyName !== 'opacity') return;
+  if (this.classList.contains('open') && !boxes.some(b => b.value)) setTimeout(() => boxes[0].focus(), 100);
 });
 
 // Countdown
